@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+pdfminer.six
+transformers==4.44.2
+torch==2.2.2
+tokenizers==0.19.1
+datasets==3.0.0
