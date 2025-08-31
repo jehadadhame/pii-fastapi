@@ -122,7 +122,7 @@ app = FastAPI()
 
 @app.get("/test")
 async def test():
-    logger.info(f"Received request to /test with file: {file.filename}")
+    logger.info(f"Received request to /test ")
     
     results = test_pipline()
     return JSONResponse(content=results)
@@ -131,7 +131,7 @@ async def test():
 
 @app.post("/redact")
 async def extract_entities(file: UploadFile = File(...)):
-    logger.info(f"Received request to /redact")
+    logger.info(f"Received request to /redact with file: {file.filename}")
     start_time = time.time()
 
     if not file.filename.endswith(".pdf"):
