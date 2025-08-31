@@ -57,8 +57,6 @@ nlp = hf_pipeline(
     model=model,
     tokenizer=tokenizer,
     device=-1,
-    truncation=True,
-    max_length=512
 )
 
 def process_pdf(pdf_path):
