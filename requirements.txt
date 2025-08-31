@@ -1,7 +1,13 @@
 fastapi
-uvicorn[standard]
-pdfminer.six
-transformers==4.55.4
+uvicorn
+python-multipart
+pdfminer-six
 torch==2.2.2
+transformers==4.55.4
 tokenizers==0.21.4
-datasets==3.0.0
+huggingface-hub==0.34.4
+safetensors
+requests
+tqdm
+regex
+numpy==1.26.4
