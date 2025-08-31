@@ -49,7 +49,9 @@ def process_pdf(pdf_path):
         "token-classification", 
         model=model, 
         tokenizer=tokenizer, 
-        device=-1   # CPU
+        device=-1,   # CPU
+        truncation=True,
+    max_length=512 
     )
     results = nlp(text)
 
@@ -96,3 +98,32 @@ async def extract_entities(file: UploadFile = File(...)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+import logging
+
+@app.post("/redact")
+async def extract_entities(file: UploadFile = File(...)):
+    logger.info(f"Received request to /extract with file: {file.filename}")
+
+    if not file.filename.endswith(".pdf"):
+        logger.warning(f"Rejected file {file.filename} (not a PDF)")
+        raise HTTPException(status_code=400, detail="Only PDF files are supported")
+
+    try:
+        # Save temp file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
+            file_bytes = await file.read()
+            tmp.write(file_bytes)
+            tmp_path = tmp.name
+        logger.info(f"Saved uploaded PDF to temp file: {tmp_path} (size: {len(file_bytes)} bytes)")
+
+        # Run pipeline
+        logger.info(f"Starting entity extraction for {file.filename}")
+        results = process_pdf(tmp_path)
+        logger.info(f"Extraction completed, found {len(results)} entities")
+
+        return JSONResponse(content=results)
+
+    except Exception as e:
+        logger.error(f"Error processing file {file.filename}: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
