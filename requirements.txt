@@ -1,7 +1,7 @@
 fastapi
 uvicorn[standard]
 pdfminer.six
-transformers==4.44.2
+transformers==4.55.4
 torch==2.2.2
-tokenizers==0.19.1
+tokenizers==0.21.4
 datasets==3.0.0

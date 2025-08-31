@@ -1,45 +1,29 @@
-# Use an official Python image
-FROM python:3.10-slim
+# -------------------------------
+#  Dockerfile for FastAPI + Conda
+# -------------------------------
+FROM continuumio/miniconda3:latest
 
-# Set work directory
+# Set working directory
 WORKDIR /app
 
-# Install system dependencies
-# (needed for pdfminer.six and PyTorch wheels sometimes)
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    git \
-    wget \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+# Copy environment.yml
+COPY environment.yml .
 
-# Install pip and upgrade
-RUN pip install --no-cache-dir --upgrade pip
+# Create conda environment
+RUN conda env create -f environment.yml
 
-# Copy requirements (create your own requirements.txt if needed)
-# If you already have requirements.yml, you can export to txt with: 
-#   pip freeze > requirements.txt
-COPY requirements.txt .
+# Make RUN commands use the new environment:
+SHELL ["conda", "run", "-n", "pii-env", "/bin/bash", "-c"]
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install uvicorn and fastapi inside the conda env
+RUN pip install fastapi uvicorn python-multipart
 
-# Install your framework versions explicitly (to match your env)
-RUN pip install --no-cache-dir \
-    fastapi \
-    uvicorn[standard] \
-    pdfminer.six \
-    "transformers==4.44.2" \
-    "torch==2.2.2" \
-    "tokenizers==0.19.1" \
-    "datasets==3.0.0" \
-    -f https://download.pytorch.org/whl/torch_stable.html
 
-# Copy project files
-COPY . .
+# Copy application code
+COPY main.py .
 
 # Expose FastAPI port
 EXPOSE 8000
 
-# Start FastAPI with uvicorn
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Run FastAPI app with uvicorn inside conda env
+CMD ["conda", "run", "--no-capture-output", "-n", "pii-env", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
